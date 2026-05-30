@@ -1,18 +1,14 @@
 @php
     /**
-     * Optional: include this once (e.g. in your layout's <head>) to preload the
-     * Google Charts loader so individual charts don't each inject it.
+     * Optional. Include this once (for example in your layout's <head>) to define the
+     * chart runtime early and preload the Google Charts loader before any chart draws:
      *
      *   @include('google-charts::scripts')
      *
-     * @var array|null $config
+     * Charts work without it; this is purely a performance hint for pages with many charts.
      */
-    $loaderUrl = $config['loader_url'] ?? config('google-charts.loader_url', 'https://www.gstatic.com/charts/loader.js');
 @endphp
+@include('google-charts::runtime')
 @once
-    <script type="text/javascript" src="{{ $loaderUrl }}"></script>
-    <script type="text/javascript">
-        window.googleChartsLaravel = window.googleChartsLaravel || { queue: [], loaderInjected: true };
-        window.googleChartsLaravel.loaderInjected = true;
-    </script>
+    <script type="text/javascript">window.GoogleChartsLaravel.preload();</script>
 @endonce

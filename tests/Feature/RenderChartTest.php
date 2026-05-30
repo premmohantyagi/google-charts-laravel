@@ -33,7 +33,8 @@ class RenderChartTest extends TestCase
 
         $this->assertStringContainsString('id="sales-chart"', $html);
         $this->assertStringContainsString('google.charts.load', $html);
-        $this->assertStringContainsString('new google.visualization.ColumnChart', $html);
+        $this->assertStringContainsString('window.GoogleChartsLaravel.render(', $html);
+        $this->assertStringContainsString('type: "ColumnChart"', $html);
         $this->assertStringContainsString('Monthly Sales', $html);
         $this->assertStringContainsString('"v":"Jan"', $html);
     }
@@ -59,6 +60,28 @@ class RenderChartTest extends TestCase
         );
 
         $this->assertStringContainsString('id="pie-1"', $rendered);
-        $this->assertStringContainsString('new google.visualization.PieChart', $rendered);
+        $this->assertStringContainsString('type: "PieChart"', $rendered);
+    }
+
+    public function test_runtime_is_emitted_once_for_multiple_charts(): void
+    {
+        $a = GoogleChart::columnChart('chart-a')
+            ->columns([['string', 'Month'], ['number', 'Sales']])
+            ->rows([['Jan', 1000]]);
+
+        $b = GoogleChart::lineChart('chart-b')
+            ->columns([['string', 'Month'], ['number', 'Sales']])
+            ->rows([['Jan', 1000]]);
+
+        $html = \Illuminate\Support\Facades\Blade::render(
+            '{!! $a->render() !!}{!! $b->render() !!}',
+            ['a' => $a, 'b' => $b]
+        );
+
+        // The shared runtime is defined exactly once, but each chart registers itself.
+        $this->assertSame(1, substr_count($html, 'window.GoogleChartsLaravel = runtime'));
+        $this->assertSame(2, substr_count($html, 'window.GoogleChartsLaravel.render('));
+        $this->assertStringContainsString('id="chart-a"', $html);
+        $this->assertStringContainsString('id="chart-b"', $html);
     }
 }
