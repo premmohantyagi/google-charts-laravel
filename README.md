@@ -38,6 +38,7 @@ $chart = GoogleChart::columnChart()
 - [Building Charts](#building-charts)
   - [Columns and rows](#columns-and-rows)
   - [Data from arrays and collections](#data-from-arrays-and-collections)
+  - [Data from Eloquent and collections](#data-from-eloquent-and-collections)
   - [Options](#options)
 - [Rendering Charts](#rendering-charts)
   - [Inline render](#inline-render)
@@ -210,6 +211,53 @@ $chart->columns([['string', 'Month'], ['number', 'Total']])
       ->data($rows);
 ```
 
+### Data from Eloquent and collections
+
+`dataset()` builds the columns and rows for you from a collection, a list of arrays or objects, or
+Eloquent models. Each column is mapped to a source field, and values are read with `data_get()`, so
+dot notation works:
+
+```php
+$chart->dataset($orders, [
+    ['string', 'Month', 'month'],   // [type, label, field]
+    ['number', 'Sales', 'total'],
+]);
+```
+
+Pass a query builder to `fromQuery()` and the query runs for you:
+
+```php
+use App\Models\Order;
+
+$chart->fromQuery(
+    Order::query()->where('year', 2026)->orderBy('month'),
+    [
+        ['string', 'Month', 'month'],
+        ['number', 'Sales', 'total'],
+    ]
+);
+```
+
+A column field can be a closure for computed values:
+
+```php
+$chart->dataset($orders, [
+    ['string', 'Month',   'month'],
+    ['number', 'Revenue', fn ($order) => $order->price * $order->quantity],
+]);
+```
+
+If you omit the column map, columns are derived from the keys or attributes of the first item, with
+types inferred from their values:
+
+```php
+// Columns: month (string), total (number)
+$chart->dataset([
+    ['month' => 'Jan', 'total' => 1000],
+    ['month' => 'Feb', 'total' => 1500],
+]);
+```
+
 ### Options
 
 `options()` accepts any of the
@@ -330,6 +378,8 @@ All setters return `$this`, so they chain.
 | `rows(iterable $rows)` | Define all rows. |
 | `addRow(array $row)` | Append a single row. |
 | `data(iterable $data)` | Alias of `rows()`. |
+| `dataset($source, array $columns = [])` | Build columns and rows from a collection, array, or models by mapping columns to fields. |
+| `fromQuery($query, array $columns = [])` | Run a query builder and build the chart from the results. |
 | `options(array $options)` | Recursively merge chart options. |
 | `set(string $key, $value)` | Set one option using dot notation (e.g. `legend.position`). |
 | `height(int\|string $height)` | Shortcut for the `height` option. |
