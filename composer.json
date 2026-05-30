@@ -1,0 +1,60 @@
+{
+    "name": "premmohantyagi/google-charts-laravel",
+    "description": "A Laravel package to easily create Google Charts using PHP, Blade components, controllers, database queries, collections, and APIs.",
+    "keywords": [
+        "laravel",
+        "google-charts",
+        "charts",
+        "visualization",
+        "blade",
+        "dashboard"
+    ],
+    "homepage": "https://github.com/premmohantyagi/google-charts-laravel",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Prem Mohan Tyagi",
+            "email": "premmohantyagi@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/view": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^9.0|^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Premmohantyagi\\GoogleCharts\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Premmohantyagi\\GoogleCharts\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Premmohantyagi\\GoogleCharts\\GoogleChartsServiceProvider"
+            ],
+            "aliases": {
+                "GoogleChart": "Premmohantyagi\\GoogleCharts\\Facades\\GoogleChart"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

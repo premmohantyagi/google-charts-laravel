@@ -1,0 +1,12 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Exclude dev-only files from the distributed (Composer) package
+/.gitattributes  export-ignore
+/.gitignore      export-ignore
+/.editorconfig   export-ignore
+/phpunit.xml     export-ignore
+/tests           export-ignore
+/.github         export-ignore
+/CHANGELOG.md    export-ignore
+/ROADMAP.md      export-ignore
