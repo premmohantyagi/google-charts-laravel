@@ -1,5 +1,10 @@
 # Google Charts for Laravel
 
+[![Tests](https://github.com/premmohantyagi/google-charts-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/premmohantyagi/google-charts-laravel/actions/workflows/tests.yml)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/premmohantyagi/google-charts-laravel.svg)](https://packagist.org/packages/premmohantyagi/google-charts-laravel)
+[![Total Downloads](https://img.shields.io/packagist/dt/premmohantyagi/google-charts-laravel.svg)](https://packagist.org/packages/premmohantyagi/google-charts-laravel)
+[![License](https://img.shields.io/packagist/l/premmohantyagi/google-charts-laravel.svg)](LICENSE)
+
 A Laravel package for building [Google Charts](https://developers.google.com/chart) with a fluent
 PHP API. You define a chart in PHP and render it in Blade. The package outputs the chart container
 and the inline JavaScript that loads the Google Charts library and draws it. There is no build step,
