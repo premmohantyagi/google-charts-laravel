@@ -45,6 +45,7 @@ $chart = GoogleChart::columnChart()
   - [Blade component](#blade-component)
   - [Multiple charts on one page](#multiple-charts-on-one-page)
 - [AJAX Charts](#ajax-charts)
+- [Dashboards and Filter Controls](#dashboards-and-filter-controls)
 - [Available Charts](#available-charts)
 - [Fluent API Reference](#fluent-api-reference)
 - [Responsive Charts](#responsive-charts)
@@ -388,6 +389,44 @@ $chart = GoogleChart::async('sales', ['year' => 2026]);
 ```blade
 {!! $chart->render() !!}
 ```
+
+## Dashboards and Filter Controls
+
+A dashboard binds filter controls to one or more charts over a single shared data set, so changing a
+filter updates every bound chart. Build one with `dashboard()`:
+
+```php
+use Premmohantyagi\GoogleCharts\Facades\GoogleChart;
+
+$dashboard = GoogleChart::dashboard('people')
+    ->columns([
+        ['string', 'Name'],
+        ['number', 'Age'],
+        ['number', 'Donuts'],
+    ])
+    ->rows([
+        ['Bob', 30, 5],
+        ['Alice', 25, 9],
+        ['Carol', 40, 3],
+    ])
+    ->control('CategoryFilter', ['filterColumnLabel' => 'Name'])
+    ->control('NumberRangeFilter', ['filterColumnLabel' => 'Age'])
+    ->chart(GoogleChart::columnChart()->title('Donuts eaten'));
+```
+
+```blade
+{!! $dashboard->render() !!}
+```
+
+The dashboard shares its data with `columns()`/`rows()` or `dataset()`, exactly like a chart.
+
+- **Controls** are added with `control($type, $options)`, where `$type` is a Google control
+  (`CategoryFilter`, `NumberRangeFilter`, `StringFilter`, `DateRangeFilter`, `ChartRangeFilter`) and
+  `$options` are its `ControlWrapper` options.
+- **Charts** are added with `chart($chart, $config)`. Pass a chart instance (its type and options are
+  used) or a Google chart type string. The optional `$config` accepts `options` and a column `view`.
+- **Binding** is all controls to all charts by default. Bind specific pairs by index with
+  `bind($controlIndexes, $chartIndexes)`.
 
 ## Available Charts
 

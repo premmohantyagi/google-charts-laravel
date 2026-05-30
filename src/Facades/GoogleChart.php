@@ -11,6 +11,7 @@ use Premmohantyagi\GoogleCharts\Charts\BaseChart;
  * @method static bool defined(string $name)
  * @method static mixed build(string $name, ...$parameters)
  * @method static \Premmohantyagi\GoogleCharts\Charts\AjaxChart async(string $name, array $parameters = [], string $id = null)
+ * @method static \Premmohantyagi\GoogleCharts\Dashboard\Dashboard dashboard(string $id = null)
  * @method static \Premmohantyagi\GoogleCharts\Charts\LineChart        lineChart(string $id = null)
  * @method static \Premmohantyagi\GoogleCharts\Charts\AreaChart        areaChart(string $id = null)
  * @method static \Premmohantyagi\GoogleCharts\Charts\BarChart         barChart(string $id = null)

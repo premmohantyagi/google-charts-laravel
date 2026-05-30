@@ -119,6 +119,46 @@
                     chart.draw(data, spec.options || {});
                 });
             }
+        },
+
+        // Build a dashboard: one shared DataTable, filter controls, and charts bound
+        // together. Uses the Google "controls" package.
+        dashboard: function (spec) {
+            this.withLoader(function () {
+                google.charts.load(spec.version || 'current', {
+                    packages: spec.packages || ['corechart', 'controls'],
+                    language: spec.language || 'en'
+                }).then(function () {
+                    var container = document.getElementById(spec.id);
+                    if (!container) {
+                        return;
+                    }
+
+                    var data = new google.visualization.DataTable(spec.dataTable);
+                    var dashboard = new google.visualization.Dashboard(container);
+
+                    var controls = (spec.controls || []).map(function (control) {
+                        return new google.visualization.ControlWrapper(control);
+                    });
+                    var charts = (spec.charts || []).map(function (chart) {
+                        return new google.visualization.ChartWrapper(chart);
+                    });
+
+                    (spec.bindings || []).forEach(function (binding) {
+                        var boundControls = (binding.controls || []).map(function (i) { return controls[i]; });
+                        var boundCharts = (binding.charts || []).map(function (i) { return charts[i]; });
+                        dashboard.bind(boundControls, boundCharts);
+                    });
+
+                    dashboard.draw(data);
+
+                    if (spec.responsive) {
+                        window.addEventListener('resize', function () {
+                            dashboard.draw(data);
+                        });
+                    }
+                });
+            });
         }
     };
 

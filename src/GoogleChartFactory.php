@@ -6,6 +6,7 @@ use BadMethodCallException;
 use InvalidArgumentException;
 use Premmohantyagi\GoogleCharts\Charts\AjaxChart;
 use Premmohantyagi\GoogleCharts\Charts\BaseChart;
+use Premmohantyagi\GoogleCharts\Dashboard\Dashboard;
 
 /**
  * Entry point behind the GoogleChart facade.
@@ -150,6 +151,14 @@ class GoogleChartFactory
         }
 
         return ($this->definitions[$name])(...$parameters);
+    }
+
+    /**
+     * Create a new dashboard (shared data with bound filter controls and charts).
+     */
+    public function dashboard(?string $id = null): Dashboard
+    {
+        return new Dashboard($id);
     }
 
     /**
