@@ -50,6 +50,7 @@ $chart = GoogleChart::columnChart()
 - [Fluent API Reference](#fluent-api-reference)
 - [Responsive Charts](#responsive-charts)
 - [Events](#events)
+- [Export as Image](#export-as-image)
 - [Testing](#testing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -491,6 +492,9 @@ All setters return `$this`, so they chain.
 | `package(string $package)` | Override the Google Charts package to load. |
 | `language(string $language)` | Override the locale used to load the library. |
 | `on(string $event, string $jsHandler)` | Register a client-side event handler. |
+| `onSelect/onReady/onError/onMouseOver/onMouseOut(string $jsHandler)` | Shortcuts for common events. |
+| `exportable(bool $enabled = true, string $label = null)` | Render a "download as PNG" button. |
+| `exportFilename(string $filename)` | Set the exported image filename. |
 | `ajax(string $url)` | Render a placeholder that loads the chart definition from a URL. |
 | `render(): string` | Render the chart to HTML (container and inline script). |
 | `toArray(): array` | Export the full chart definition (useful for AJAX or JSON). |
@@ -509,13 +513,45 @@ $chart->width('100%');
 ## Events
 
 Attach a Google Charts event by passing the name and a JavaScript handler expression, such as a
-function name or an inline function:
+function name or an inline function. The handler is called with the chart, its DataTable, and the
+native event, so it can read the current selection:
 
 ```php
-$chart->on('select', 'function () { console.log("selected"); }');
+$chart->on('select', 'function (chart, data) {
+    var selection = chart.getSelection();
+    if (selection.length) {
+        console.log(data.getValue(selection[0].row, 0));
+    }
+}');
 ```
 
-The handler is registered with `google.visualization.events.addListener` when the chart draws.
+There are shortcuts for the common events:
+
+```php
+$chart->onSelect('handleSelect')   // select
+      ->onReady('handleReady')     // ready
+      ->onError('handleError')     // error
+      ->onMouseOver('handleOver')  // onmouseover
+      ->onMouseOut('handleOut');   // onmouseout
+```
+
+## Export as Image
+
+Call `exportable()` to render a button that downloads the chart as a PNG:
+
+```php
+$chart->exportable();                              // "Download PNG" button
+$chart->exportable(true, 'Save image')             // custom label
+      ->exportFilename('monthly-sales.png');       // custom filename
+```
+
+You can also trigger a download from your own JavaScript:
+
+```js
+window.GoogleChartsLaravel.download('chart-id', 'chart.png');
+```
+
+Image export uses Google's `getImageURI()`, which is available for the core (SVG-based) charts.
 
 ## Testing
 

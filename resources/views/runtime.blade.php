@@ -11,6 +11,7 @@
         loaderUrl: {!! json_encode($loaderUrl, $jsonFlags) !!},
         loaderInjected: false,
         queue: [],
+        instances: {},
 
         // Ensure the Google Charts loader is present, then run the callback once it is ready.
         // The loader script is injected only once per page, no matter how many charts there are.
@@ -104,12 +105,16 @@
             var data = new google.visualization.DataTable(spec.dataTable);
             var chart = new google.visualization[spec.type](container);
 
+            // Keep the chart so it can be exported as an image later.
+            this.instances[spec.id] = chart;
+
             if (spec.events) {
-                for (var name in spec.events) {
-                    if (Object.prototype.hasOwnProperty.call(spec.events, name)) {
-                        google.visualization.events.addListener(chart, name, spec.events[name]);
-                    }
-                }
+                Object.keys(spec.events).forEach(function (name) {
+                    google.visualization.events.addListener(chart, name, function (event) {
+                        // Handlers receive the chart, its DataTable, and the native event.
+                        spec.events[name](chart, data, event);
+                    });
+                });
             }
 
             chart.draw(data, spec.options || {});
@@ -119,6 +124,32 @@
                     chart.draw(data, spec.options || {});
                 });
             }
+        },
+
+        // The PNG data URI of a drawn chart, or null if it cannot be exported.
+        getImageUri: function (id) {
+            var chart = this.instances[id];
+
+            return (chart && typeof chart.getImageURI === 'function') ? chart.getImageURI() : null;
+        },
+
+        // Download a drawn chart as a PNG image.
+        download: function (id, filename) {
+            var uri = this.getImageUri(id);
+
+            if (!uri) {
+                if (window.console && console.warn) {
+                    console.warn('GoogleChartsLaravel: chart "' + id + '" cannot be exported as an image');
+                }
+                return;
+            }
+
+            var link = document.createElement('a');
+            link.href = uri;
+            link.download = filename || (id + '.png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         },
 
         // Build a dashboard: one shared DataTable, filter controls, and charts bound
@@ -163,6 +194,19 @@
     };
 
     window.GoogleChartsLaravel = runtime;
+
+    // Delegated handler so any [data-google-chart-export] button downloads its chart.
+    document.addEventListener('click', function (event) {
+        var el = event.target;
+        while (el && el !== document) {
+            if (el.getAttribute && el.getAttribute('data-google-chart-export')) {
+                var id = el.getAttribute('data-google-chart-export');
+                runtime.download(id, el.getAttribute('data-google-chart-filename') || (id + '.png'));
+                return;
+            }
+            el = el.parentNode;
+        }
+    });
 })();
 </script>
 @endonce

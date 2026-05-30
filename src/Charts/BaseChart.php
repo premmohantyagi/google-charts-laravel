@@ -51,6 +51,21 @@ abstract class BaseChart implements Chart, Htmlable, Jsonable, JsonSerializable
      */
     protected ?string $ajaxUrl = null;
 
+    /**
+     * Whether to render a "download as image" button.
+     */
+    protected bool $exportable = false;
+
+    /**
+     * Custom export button label.
+     */
+    protected ?string $exportLabel = null;
+
+    /**
+     * Custom export filename.
+     */
+    protected ?string $exportFilename = null;
+
     public function __construct(?string $id = null)
     {
         $this->id = $id ?: ChartIdGenerator::generate();
@@ -164,13 +179,103 @@ abstract class BaseChart implements Chart, Htmlable, Jsonable, JsonSerializable
     }
 
     /**
-     * Register a client-side event handler (reserved for v0.1.5).
+     * Register a client-side event handler. The handler is a JavaScript expression
+     * (a function name or an inline function) and is invoked as
+     * handler(chart, dataTable, event) when the event fires.
      */
     public function on(string $event, string $jsHandler): self
     {
         $this->events[$event] = $jsHandler;
 
         return $this;
+    }
+
+    /**
+     * Handle the "select" event (a user clicks a point, bar, slice, etc.).
+     */
+    public function onSelect(string $jsHandler): self
+    {
+        return $this->on('select', $jsHandler);
+    }
+
+    /**
+     * Handle the "ready" event (the chart has finished drawing).
+     */
+    public function onReady(string $jsHandler): self
+    {
+        return $this->on('ready', $jsHandler);
+    }
+
+    /**
+     * Handle the "error" event.
+     */
+    public function onError(string $jsHandler): self
+    {
+        return $this->on('error', $jsHandler);
+    }
+
+    /**
+     * Handle the "onmouseover" event.
+     */
+    public function onMouseOver(string $jsHandler): self
+    {
+        return $this->on('onmouseover', $jsHandler);
+    }
+
+    /**
+     * Handle the "onmouseout" event.
+     */
+    public function onMouseOut(string $jsHandler): self
+    {
+        return $this->on('onmouseout', $jsHandler);
+    }
+
+    /**
+     * Render a "download as PNG" button next to the chart.
+     */
+    public function exportable(bool $enabled = true, ?string $label = null): self
+    {
+        $this->exportable = $enabled;
+
+        if ($label !== null) {
+            $this->exportLabel = $label;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the filename used when the chart is exported as an image.
+     */
+    public function exportFilename(string $filename): self
+    {
+        $this->exportFilename = $filename;
+
+        return $this;
+    }
+
+    /**
+     * Whether an export button should be rendered.
+     */
+    public function isExportable(): bool
+    {
+        return $this->exportable;
+    }
+
+    /**
+     * The export button label.
+     */
+    public function getExportLabel(): string
+    {
+        return $this->exportLabel ?: 'Download PNG';
+    }
+
+    /**
+     * The filename used when exporting the chart as an image.
+     */
+    public function getExportFilename(): string
+    {
+        return $this->exportFilename ?: $this->id . '.png';
     }
 
     /**

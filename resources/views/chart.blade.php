@@ -31,6 +31,11 @@
 @endphp
 @include('google-charts::runtime')
 <div id="{{ $id }}" class="google-chart" style="width: {{ $width }}; height: {{ $height }};"></div>
+@if ($chart->isExportable())
+<button type="button" class="google-chart-export"
+    data-google-chart-export="{{ $id }}"
+    data-google-chart-filename="{{ $chart->getExportFilename() }}">{{ $chart->getExportLabel() }}</button>
+@endif
 <script type="text/javascript">
 @if ($chart->isAjax())
 window.GoogleChartsLaravel.load({
