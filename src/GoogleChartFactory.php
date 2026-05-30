@@ -119,6 +119,30 @@ class GoogleChartFactory
     }
 
     /**
+     * Metadata for every chart type, used by the visual builder.
+     *
+     * @return array<int, array{method: string, label: string, type: string, package: string}>
+     */
+    public function chartTypes(): array
+    {
+        $types = [];
+
+        foreach ($this->charts as $method => $class) {
+            $instance = new $class();
+            $spaced = preg_replace('/(?<!^)([A-Z])/', ' $1', $method);
+
+            $types[] = [
+                'method' => $method,
+                'label' => ucwords($spaced),
+                'type' => $instance->getType(),
+                'package' => $instance->getPackage(),
+            ];
+        }
+
+        return $types;
+    }
+
+    /**
      * Define a named chart builder for the AJAX endpoint. The callback receives any
      * parameters passed to build() (the HTTP request when called from the route) and
      * should return a chart instance.

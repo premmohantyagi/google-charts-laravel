@@ -98,6 +98,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Visual Dashboard Builder
+    |--------------------------------------------------------------------------
+    |
+    | An optional, opt-in page that lets you build a chart or dashboard visually
+    | and copy the generated PHP and JSON. Disabled by default. When enabled it is
+    | served at {prefix}/{path} (e.g. /google-charts/builder). Protect it with
+    | middleware (for example 'auth') in non-local environments.
+    |
+    */
+
+    'builder' => [
+        'enabled' => false,
+        'prefix' => 'google-charts',
+        'path' => 'builder',
+        'middleware' => ['web'],
+        'as' => 'google-charts.',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Chart Options
     |--------------------------------------------------------------------------
     |

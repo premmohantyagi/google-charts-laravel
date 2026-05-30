@@ -5,6 +5,7 @@ namespace Premmohantyagi\GoogleCharts;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Premmohantyagi\GoogleCharts\Http\Controllers\BuilderController;
 use Premmohantyagi\GoogleCharts\Http\Controllers\ChartController;
 use Premmohantyagi\GoogleCharts\View\Components\GoogleChartComponent;
 
@@ -32,6 +33,9 @@ class GoogleChartsServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'google-charts');
 
         $this->registerBladeComponents();
+        // The builder route is registered first so its static path is matched before
+        // the AJAX endpoint's "{name}" wildcard when both share a prefix.
+        $this->registerBuilderRoute();
         $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
@@ -56,6 +60,26 @@ class GoogleChartsServiceProvider extends ServiceProvider
             'as' => $config['as'] ?? 'google-charts.',
         ], function () {
             Route::get('{name}', [ChartController::class, 'show'])->name('show');
+        });
+    }
+
+    /**
+     * Register the optional visual builder page when enabled in the config.
+     */
+    protected function registerBuilderRoute(): void
+    {
+        $config = (array) $this->app['config']->get('google-charts.builder', []);
+
+        if (empty($config['enabled'])) {
+            return;
+        }
+
+        Route::group([
+            'prefix' => $config['prefix'] ?? 'google-charts',
+            'middleware' => $config['middleware'] ?? ['web'],
+            'as' => $config['as'] ?? 'google-charts.',
+        ], function () use ($config) {
+            Route::get($config['path'] ?? 'builder', [BuilderController::class, 'index'])->name('builder');
         });
     }
 

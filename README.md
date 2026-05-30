@@ -51,6 +51,7 @@ $chart = GoogleChart::columnChart()
 - [Responsive Charts](#responsive-charts)
 - [Events](#events)
 - [Export as Image](#export-as-image)
+- [Visual Builder](#visual-builder)
 - [Testing](#testing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -552,6 +553,34 @@ window.GoogleChartsLaravel.download('chart-id', 'chart.png');
 ```
 
 Image export uses Google's `getImageURI()`, which is available for the core (SVG-based) charts.
+
+## Visual Builder
+
+The package includes an optional page for building a chart or dashboard visually: choose a chart
+type, edit the columns and rows, add filter controls, and see a live preview. The builder generates
+the matching PHP and JSON for you to copy into your app.
+
+Enable it in the config:
+
+```php
+// config/google-charts.php
+'builder' => [
+    'enabled' => true,
+    'prefix' => 'google-charts',
+    'path' => 'builder',
+    'middleware' => ['web'],
+    'as' => 'google-charts.',
+],
+```
+
+The builder is then served at `/google-charts/builder`. It is disabled by default; when you enable
+it outside local development, protect it with middleware (for example `'auth'`).
+
+To embed the builder in your own page instead of using the route, include the view:
+
+```blade
+@include('google-charts::builder', ['chartTypes' => app('google-charts')->chartTypes()])
+```
 
 ## Testing
 
