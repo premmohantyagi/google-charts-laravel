@@ -46,6 +46,41 @@
             this.withLoader(function () {});
         },
 
+        // Fetch a chart definition from a URL and draw it. The endpoint is expected to
+        // return a chart's toArray() JSON (type, package, dataTable, options, language).
+        load: function (spec) {
+            var self = this;
+            var container = document.getElementById(spec.id);
+
+            fetch(spec.url, spec.fetch || {})
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    self.render({
+                        id: spec.id,
+                        type: payload.type,
+                        version: spec.version || payload.version,
+                        language: payload.language,
+                        packages: payload.packages || (payload.package ? [payload.package] : undefined),
+                        dataTable: payload.dataTable,
+                        options: Object.assign({}, spec.options || {}, payload.options || {}),
+                        responsive: spec.responsive
+                    });
+                })
+                .catch(function (error) {
+                    if (window.console && console.error) {
+                        console.error('GoogleChartsLaravel: failed to load chart "' + spec.id + '"', error);
+                    }
+                    if (container) {
+                        container.setAttribute('data-google-chart-error', '1');
+                    }
+                });
+        },
+
         // Register a chart for drawing. Packages from every chart are loaded through the
         // shared loader, so the library is fetched once and reused.
         render: function (spec) {

@@ -44,6 +44,7 @@ $chart = GoogleChart::columnChart()
   - [Inline render](#inline-render)
   - [Blade component](#blade-component)
   - [Multiple charts on one page](#multiple-charts-on-one-page)
+- [AJAX Charts](#ajax-charts)
 - [Available Charts](#available-charts)
 - [Fluent API Reference](#fluent-api-reference)
 - [Responsive Charts](#responsive-charts)
@@ -324,6 +325,70 @@ performance:
 @include('google-charts::scripts')
 ```
 
+## AJAX Charts
+
+A chart can load its data from an endpoint instead of having it serialized into the page. This keeps
+the initial response small and lets data refresh without a full reload.
+
+Charts are JSON serializable, so an endpoint can return a chart directly:
+
+```php
+use Premmohantyagi\GoogleCharts\Facades\GoogleChart;
+
+Route::get('/charts/sales', function () {
+    return GoogleChart::columnChart()
+        ->columns([['string', 'Month'], ['number', 'Sales']])
+        ->rows(Order::salesByMonth());
+});
+```
+
+Render a placeholder that fetches that URL with `ajax()`:
+
+```php
+$chart = GoogleChart::columnChart('sales')->ajax('/charts/sales');
+```
+
+```blade
+{!! $chart->render() !!}
+```
+
+### Built-in endpoint
+
+The package ships an optional route for serving named charts. Enable it in the config:
+
+```php
+// config/google-charts.php
+'route' => [
+    'enabled' => true,
+    'prefix' => 'google-charts',
+    'middleware' => ['web'],
+    'as' => 'google-charts.',
+],
+```
+
+Register named charts (for example in a service provider's `boot()` method). The builder receives the
+current request:
+
+```php
+use Premmohantyagi\GoogleCharts\Facades\GoogleChart;
+
+GoogleChart::define('sales', function ($request) {
+    return GoogleChart::columnChart()
+        ->columns([['string', 'Month'], ['number', 'Sales']])
+        ->rows(Order::salesByMonth($request->integer('year')));
+});
+```
+
+Render a placeholder pointing at the named chart with `async()`:
+
+```php
+$chart = GoogleChart::async('sales', ['year' => 2026]);
+```
+
+```blade
+{!! $chart->render() !!}
+```
+
 ## Available Charts
 
 Every chart is reachable as a facade method (for example `GoogleChart::columnChart()`) and as a
@@ -387,8 +452,10 @@ All setters return `$this`, so they chain.
 | `package(string $package)` | Override the Google Charts package to load. |
 | `language(string $language)` | Override the locale used to load the library. |
 | `on(string $event, string $jsHandler)` | Register a client-side event handler. |
+| `ajax(string $url)` | Render a placeholder that loads the chart definition from a URL. |
 | `render(): string` | Render the chart to HTML (container and inline script). |
 | `toArray(): array` | Export the full chart definition (useful for AJAX or JSON). |
+| `toJson($options = 0): string` | Export the chart definition as JSON. |
 | `getId()` / `getType()` / `getPackage()` / `getOptions()` / `getDataTable()` | Inspect the built chart. |
 
 ## Responsive Charts

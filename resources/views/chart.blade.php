@@ -32,6 +32,15 @@
 @include('google-charts::runtime')
 <div id="{{ $id }}" class="google-chart" style="width: {{ $width }}; height: {{ $height }};"></div>
 <script type="text/javascript">
+@if ($chart->isAjax())
+window.GoogleChartsLaravel.load({
+    id: {!! $idJson !!},
+    url: {!! json_encode($chart->getAjaxUrl(), $jsonFlags) !!},
+    version: {!! $versionJson !!},
+    options: {!! $optionsJson !!},
+    responsive: {{ $responsive ? 'true' : 'false' }}
+});
+@else
 window.GoogleChartsLaravel.render({
     id: {!! $idJson !!},
     type: {!! $typeJson !!},
@@ -47,4 +56,5 @@ window.GoogleChartsLaravel.render({
         @endforeach
     }
 });
+@endif
 </script>

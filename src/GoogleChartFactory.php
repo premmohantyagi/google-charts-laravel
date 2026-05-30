@@ -3,6 +3,8 @@
 namespace Premmohantyagi\GoogleCharts;
 
 use BadMethodCallException;
+use InvalidArgumentException;
+use Premmohantyagi\GoogleCharts\Charts\AjaxChart;
 use Premmohantyagi\GoogleCharts\Charts\BaseChart;
 
 /**
@@ -73,6 +75,13 @@ class GoogleChartFactory
     ];
 
     /**
+     * Named chart builders, used by the AJAX endpoint.
+     *
+     * @var array<string, callable>
+     */
+    protected array $definitions = [];
+
+    /**
      * Create a chart instance by its registered method name.
      */
     public function make(string $chart, ?string $id = null): BaseChart
@@ -106,6 +115,54 @@ class GoogleChartFactory
     public function available(): array
     {
         return $this->charts;
+    }
+
+    /**
+     * Define a named chart builder for the AJAX endpoint. The callback receives any
+     * parameters passed to build() (the HTTP request when called from the route) and
+     * should return a chart instance.
+     */
+    public function define(string $name, callable $builder): self
+    {
+        $this->definitions[$name] = $builder;
+
+        return $this;
+    }
+
+    /**
+     * Whether a named chart builder exists.
+     */
+    public function defined(string $name): bool
+    {
+        return isset($this->definitions[$name]);
+    }
+
+    /**
+     * Build a named chart, passing through any parameters to its builder.
+     *
+     * @param  mixed  ...$parameters
+     * @return mixed
+     */
+    public function build(string $name, ...$parameters)
+    {
+        if (! isset($this->definitions[$name])) {
+            throw new InvalidArgumentException("No chart named [{$name}] is defined.");
+        }
+
+        return ($this->definitions[$name])(...$parameters);
+    }
+
+    /**
+     * Create a placeholder chart that loads a named chart from the built-in route.
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public function async(string $name, array $parameters = [], ?string $id = null): AjaxChart
+    {
+        $routeName = (string) config('google-charts.route.as', 'google-charts.') . 'show';
+        $url = route($routeName, array_merge(['name' => $name], $parameters));
+
+        return (new AjaxChart($id))->ajax($url);
     }
 
     /**

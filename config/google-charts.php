@@ -76,6 +76,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AJAX Endpoint
+    |--------------------------------------------------------------------------
+    |
+    | An optional, opt-in route that serves named charts as JSON for async
+    | loading. Register a chart with:
+    |
+    |     GoogleChart::define('sales', fn ($request) => GoogleChart::lineChart()->...);
+    |
+    | then render a placeholder with GoogleChart::async('sales'). Disabled by
+    | default so the package adds no routes unless you ask for them.
+    |
+    */
+
+    'route' => [
+        'enabled' => false,
+        'prefix' => 'google-charts',
+        'middleware' => ['web'],
+        'as' => 'google-charts.',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Chart Options
     |--------------------------------------------------------------------------
     |

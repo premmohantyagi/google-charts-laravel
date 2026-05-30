@@ -3,7 +3,9 @@
 namespace Premmohantyagi\GoogleCharts;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Premmohantyagi\GoogleCharts\Http\Controllers\ChartController;
 use Premmohantyagi\GoogleCharts\View\Components\GoogleChartComponent;
 
 class GoogleChartsServiceProvider extends ServiceProvider
@@ -30,10 +32,31 @@ class GoogleChartsServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'google-charts');
 
         $this->registerBladeComponents();
+        $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->registerPublishing();
         }
+    }
+
+    /**
+     * Register the optional AJAX endpoint when enabled in the config.
+     */
+    protected function registerRoutes(): void
+    {
+        $config = (array) $this->app['config']->get('google-charts.route', []);
+
+        if (empty($config['enabled'])) {
+            return;
+        }
+
+        Route::group([
+            'prefix' => $config['prefix'] ?? 'google-charts',
+            'middleware' => $config['middleware'] ?? ['web'],
+            'as' => $config['as'] ?? 'google-charts.',
+        ], function () {
+            Route::get('{name}', [ChartController::class, 'show'])->name('show');
+        });
     }
 
     /**

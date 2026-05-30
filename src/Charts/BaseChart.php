@@ -4,13 +4,15 @@ namespace Premmohantyagi\GoogleCharts\Charts;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
 use Premmohantyagi\GoogleCharts\Contracts\Chart;
 use Premmohantyagi\GoogleCharts\Data\DataTable;
 use Premmohantyagi\GoogleCharts\Support\ChartIdGenerator;
 use Premmohantyagi\GoogleCharts\Support\PackageMapper;
 use Traversable;
 
-abstract class BaseChart implements Chart, Htmlable
+abstract class BaseChart implements Chart, Htmlable, Jsonable, JsonSerializable
 {
     /**
      * Unique DOM id of the chart container.
@@ -56,6 +58,12 @@ abstract class BaseChart implements Chart, Htmlable
      * @var array<string, string>
      */
     protected array $events = [];
+
+    /**
+     * When set, the chart is rendered as a placeholder that loads its data from
+     * this URL instead of having the data serialized into the page.
+     */
+    protected ?string $ajaxUrl = null;
 
     public function __construct(?string $id = null)
     {
@@ -352,6 +360,35 @@ abstract class BaseChart implements Chart, Htmlable
     }
 
     /**
+     * Render the chart as a placeholder that loads its data from the given URL.
+     *
+     * The endpoint is expected to return a chart's toArray() JSON. A controller can
+     * return a chart instance directly, since charts are JSON serializable.
+     */
+    public function ajax(string $url): self
+    {
+        $this->ajaxUrl = $url;
+
+        return $this;
+    }
+
+    /**
+     * The URL this chart loads its data from, or null for an inline chart.
+     */
+    public function getAjaxUrl(): ?string
+    {
+        return $this->ajaxUrl;
+    }
+
+    /**
+     * Whether the chart loads its data asynchronously.
+     */
+    public function isAjax(): bool
+    {
+        return $this->ajaxUrl !== null;
+    }
+
+    /**
      * Export the full chart definition (useful for AJAX/JSON loading).
      *
      * @return array<string, mixed>
@@ -367,6 +404,24 @@ abstract class BaseChart implements Chart, Htmlable
             'options' => $this->getOptions(),
             'events' => $this->getEvents(),
         ];
+    }
+
+    /**
+     * The chart definition as JSON.
+     *
+     * @param  int  $options
+     */
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->jsonSerialize(), $options);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 
     /**
